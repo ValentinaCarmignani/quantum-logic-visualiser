@@ -1,0 +1,8 @@
+# Python dependencies for the desktop Quantum Logic Visualiser.
+# The web version needs nothing - it runs straight in the browser.
+
+numpy>=1.21        # exact statevector simulation
+
+# tkinter is part of the Python standard library (ships with the official
+# python.org installers on Windows and macOS). On Debian/Ubuntu Linux install
+# it with:  sudo apt install python3-tk

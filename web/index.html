@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Logic Visualiser · See Quantum Computing</title>
+  <meta name="description" content="A fun, interactive way for high-school students to learn quantum computing by turning circuits into colourful ZX-diagrams. Built by Valentina Carmignani." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- floating background blobs -->
+  <div class="bg-blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <!-- ====================== HERO ====================== -->
+  <header class="hero">
+    <nav class="nav">
+      <div class="brand">⚛ Quantum Logic Visualiser</div>
+      <div class="nav-links">
+        <a href="#playground">Playground</a>
+        <a href="#learn">Learn</a>
+        <a href="#why">Why it matters</a>
+        <a class="nav-gh" href="#" data-github>GitHub</a>
+      </div>
+    </nav>
+
+    <div class="hero-inner">
+      <div class="hero-badge">A Big Bang Competition project</div>
+      <h1 class="hero-title">See <span class="grad">quantum computing</span><br />instead of just doing the maths</h1>
+      <p class="hero-sub">
+        Quantum computers don't work like the laptop in your bag. This playground lets you
+        <b>build a quantum circuit</b> and instantly watch it turn into a colourful
+        <b>ZX-diagram</b> — no scary matrices required. Click a gate. Watch the dots light up.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#playground">▶ Start building</a>
+        <a class="btn btn-ghost" href="#learn">What's a qubit?</a>
+      </div>
+      <div class="hero-spiders" aria-hidden="true">
+        <span class="demo-spider green">π</span>
+        <span class="demo-wire"></span>
+        <span class="demo-spider yellow">H</span>
+        <span class="demo-wire"></span>
+        <span class="demo-spider red">½π</span>
+      </div>
+    </div>
+    <a class="scroll-hint" href="#playground">scroll to play ↓</a>
+  </header>
+
+  <!-- ====================== PLAYGROUND ====================== -->
+  <main>
+    <section id="playground" class="section">
+      <h2 class="section-title">🧪 The Quantum Playground</h2>
+      <p class="section-lead">
+        Pick how many qubits you want, click gates to add them, and watch two things update live:
+        the <b>ZX-diagram</b> (the picture) and the <b>measurement chances</b> (the numbers).
+      </p>
+
+      <div class="playground">
+        <!-- LEFT: controls -->
+        <div class="panel controls">
+          <div class="control-row">
+            <label>Qubits</label>
+            <div class="stepper">
+              <button id="q-minus" aria-label="fewer qubits">−</button>
+              <span id="q-count">2</span>
+              <button id="q-plus" aria-label="more qubits">+</button>
+            </div>
+          </div>
+
+          <div class="gate-group">
+            <h4>Single-qubit gates</h4>
+            <div class="gate-grid" data-gates="H,X,Y,Z,S,T"></div>
+          </div>
+          <div class="gate-group">
+            <h4>Rotations <span class="hint">(need an angle)</span></h4>
+            <div class="gate-grid" data-gates="RX,RY,RZ"></div>
+          </div>
+          <div class="gate-group">
+            <h4>Two-qubit gates</h4>
+            <div class="gate-grid" data-gates="CNOT,CZ,SWAP"></div>
+          </div>
+
+          <div class="adder">
+            <div class="adder-row">
+              <span class="adder-label">Gate</span>
+              <span id="sel-gate" class="sel-gate">H</span>
+              <span id="sel-help" class="sel-help">Creates superposition.</span>
+            </div>
+            <div class="adder-row">
+              <span class="adder-label">Qubit(s)</span>
+              <input id="qubit-input" type="text" value="0" placeholder="0  or  0,1" />
+            </div>
+            <div class="adder-row" id="angle-row" hidden>
+              <span class="adder-label">Angle</span>
+              <input id="angle-input" type="text" value="pi/2" placeholder="pi, pi/2, 0.5…" />
+            </div>
+            <button id="add-gate" class="btn btn-add">➕ Add gate</button>
+          </div>
+
+          <div class="mini-actions">
+            <button id="undo" class="chip-btn">↶ Undo</button>
+            <button id="clear" class="chip-btn">🗑 Clear</button>
+            <button id="simplify" class="chip-btn toggle">✨ Simplify (ZX)</button>
+          </div>
+
+          <div class="examples">
+            <span class="examples-label">Try:</span>
+            <button class="ex-btn" data-example="bell">Bell pair</button>
+            <button class="ex-btn" data-example="ghz">GHZ trio</button>
+            <button class="ex-btn" data-example="super">Superposition</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: visual -->
+        <div class="panel visual">
+          <div class="visual-head">
+            <h4>ZX-diagram</h4>
+            <div class="legend">
+              <span><i class="dot green"></i> Z (green)</span>
+              <span><i class="dot red"></i> X (red)</span>
+              <span><i class="dot yellow"></i> Hadamard</span>
+            </div>
+          </div>
+          <div id="circuit-strip" class="circuit-strip"></div>
+          <div class="diagram-wrap">
+            <svg id="zx-svg" viewBox="0 0 760 320" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+
+          <div class="results">
+            <div class="results-head">
+              <h4>If you measured right now…</h4>
+              <button id="measure" class="btn btn-measure">🎲 Measure!</button>
+            </div>
+            <div id="measure-msg" class="measure-msg"></div>
+            <div id="prob-bars" class="prob-bars"></div>
+            <div class="state-line"><span>state:</span> <code id="ket"></code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== LEARN ====================== -->
+    <section id="learn" class="section">
+      <h2 class="section-title">💡 The big ideas (in plain English)</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="card-emoji">🪙</div>
+          <h3>A qubit isn't 0 or 1</h3>
+          <p>A normal bit is a coin lying flat: heads (0) or tails (1). A <b>qubit</b> is a
+          coin <i>spinning in the air</i> — somehow both at once until it lands. That "spinning"
+          is what gives quantum computers their power.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji">🌫️</div>
+          <h3>Superposition</h3>
+          <p>The <b>Hadamard (H)</b> gate sets a qubit spinning, so it has a 50/50 chance of
+          landing on 0 or 1. Add an H and watch the probability bars split exactly in half.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji">🔗</div>
+          <h3>Entanglement</h3>
+          <p>Use <b>H then CNOT</b> and the two qubits become a single team: measure one and you
+          instantly know the other, even if they're far apart. Einstein called it "spooky." Try
+          the <b>Bell pair</b> example!</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji">🕸️</div>
+          <h3>ZX-calculus</h3>
+          <p>Instead of multiplying big matrices, ZX-calculus draws quantum logic as
+          <b>green and red dots</b> ("spiders") joined by wires. Same physics, way friendlier —
+          that's the whole idea behind this tool.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji">🎚️</div>
+          <h3>Phases &amp; rotations</h3>
+          <p>Gates like <b>S, T</b> and <b>RZ</b> nudge a qubit by an <i>angle</i> (a phase). In a
+          ZX-diagram that angle is just a number written inside the dot. Hit <b>Simplify</b> to
+          watch same-coloured dots merge and their angles add up.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji">📏</div>
+          <h3>Measurement</h3>
+          <p>You can't peek at a qubit without changing it. Measuring forces the spinning coin to
+          land. Press <b>🎲 Measure!</b> and the superposition collapses to a single answer —
+          chosen randomly, weighted by those probability bars.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ====================== WHY IT MATTERS ====================== -->
+    <section id="why" class="section why">
+      <h2 class="section-title">🚀 Why should <em>you</em> care?</h2>
+      <p class="section-lead">
+        Quantum computing is moving from theory to reality <b>right now</b> — while you're still in
+        school. The people who'll build, program and use these machines in the 2030s are sitting in
+        classrooms today. That could be you.
+      </p>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <h3>🧬 New medicines &amp; materials</h3>
+          <p>Quantum computers can simulate molecules far better than normal ones — potentially
+          speeding up the design of drugs, batteries and clean-energy materials.</p>
+        </div>
+        <div class="why-card">
+          <h3>🔐 The future of security</h3>
+          <p>A big enough quantum computer could crack today's encryption ("Q-Day"). That's why
+          the world is already switching to <b>post-quantum cryptography</b> — a brand-new career field.</p>
+        </div>
+        <div class="why-card">
+          <h3>🤖 Smarter optimisation &amp; AI</h3>
+          <p>From routing delivery trucks to training models, many hard "find the best option"
+          problems are exactly what quantum machines are built to attack.</p>
+        </div>
+        <div class="why-card">
+          <h3>📈 It's happening fast</h3>
+          <p>In 2024–2025, Google's <b>Willow</b> chip showed errors <i>shrinking</i> as it grew —
+          a milestone called going "below threshold." Researchers now think genuinely useful
+          quantum computers are realistic within about five years.</p>
+        </div>
+      </div>
+
+      <div class="reality-note">
+        <b>Keeping it real:</b> today's quantum computers are still small and noisy — it takes
+        hundreds of physical qubits to make one reliable "logical" qubit, and truly powerful
+        machines may need millions. We're at the exciting, early, <i>get-in-now</i> stage —
+        a bit like home computers in the 1970s. Learning the ideas today is a head start.
+      </div>
+    </section>
+  </main>
+
+  <!-- ====================== FOOTER ====================== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">⚛ Quantum Logic Visualiser</div>
+        <p>An open-source educational tool that turns quantum circuits into ZX-diagrams,
+        built to make quantum computing approachable for high-school students.</p>
+      </div>
+      <div class="footer-meta">
+        <p>Created by <b>Valentina Carmignani</b></p>
+        <p>Big Bang Competition project</p>
+        <p><a href="#" data-github>View the code on GitHub →</a></p>
+        <p class="muted">Open source · MIT licensed · runs entirely in your browser</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- tooltip -->
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <script src="quantum-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
