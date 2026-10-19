@@ -52,6 +52,9 @@
     $("guide-close").onclick = hideGuide;
     document.querySelectorAll("[data-github]").forEach((a) => { a.href = REPO_URL; a.target = "_blank"; });
 
+    // redraw the diagram when colour-blind mode is switched on or off
+    document.addEventListener("a11ychange", (e) => { if (e.detail.name === "cb") render(); });
+
     selectGate("H");
     render();
   }
@@ -221,6 +224,7 @@
   function showGuide(html) {
     $("guide-text").innerHTML = html;
     $("guide").hidden = false;
+    if (window.A11Y) A11Y.announce(html);
   }
   function hideGuide() { $("guide").hidden = true; }
 
@@ -347,7 +351,19 @@
         t.textContent = "H";
         g.appendChild(t);
       } else {
-        g.appendChild(el("circle", { cx: s.x, cy: s.y, r: 16, fill: s.colour, stroke: "#fff", "stroke-width": 2 }));
+        const cb = window.A11Y && A11Y.colourBlind();
+        const isX = s.type === QE.X_SPIDER;
+        // colour-blind mode: X spiders get a dashed ring so shape tells them apart too
+        g.appendChild(el("circle", { cx: s.x, cy: s.y, r: 16, fill: s.colour, stroke: "#fff", "stroke-width": cb ? 3 : 2,
+          "stroke-dasharray": cb && isX ? "5 3" : "none" }));
+        if (cb) {
+          // ...and a small Z or X letter badge on its top-right corner
+          g.appendChild(el("circle", { cx: s.x + 15, cy: s.y - 15, r: 8, fill: "#0b0e23", stroke: "#fff", "stroke-width": 1.5 }));
+          const letter = el("text", { x: s.x + 15, y: s.y - 11, "text-anchor": "middle", fill: "#fff",
+            "font-size": 11, "font-weight": 800, class: "cb-letter" });
+          letter.textContent = isX ? "X" : "Z";
+          g.appendChild(letter);
+        }
         const label = QE.prettyPhase(s.phase);
         if (label !== "0") {
           const t = el("text", { x: s.x, y: s.y + 5, "text-anchor": "middle", "font-size": 12, "font-weight": 700,
