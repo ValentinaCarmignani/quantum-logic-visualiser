@@ -129,6 +129,11 @@
               <span><i class="dot yellow"></i> Hadamard</span>
             </div>
           </div>
+          <div id="guide" class="guide" role="status" aria-live="polite" hidden>
+            <span class="guide-icon" aria-hidden="true">🧭</span>
+            <p id="guide-text" class="guide-text"></p>
+            <button id="guide-close" class="guide-close" aria-label="Close this tip">✕</button>
+          </div>
           <div id="circuit-strip" class="circuit-strip"></div>
           <div class="diagram-wrap">
             <svg id="zx-svg" viewBox="0 0 760 320" preserveAspectRatio="xMidYMid meet"></svg>
@@ -157,12 +162,14 @@
           <p>A normal bit is a coin lying flat: heads (0) or tails (1). A <b>qubit</b> is a
           coin <i>spinning in the air</i> — somehow both at once until it lands. That "spinning"
           is what gives quantum computers their power.</p>
+          <button class="try-btn" data-try="flip">▶ Try it in the playground</button>
         </article>
         <article class="card">
           <div class="card-emoji">🌫️</div>
           <h3>Superposition</h3>
           <p>The <b>Hadamard (H)</b> gate sets a qubit spinning, so it has a 50/50 chance of
           landing on 0 or 1. Add an H and watch the probability bars split exactly in half.</p>
+          <button class="try-btn" data-try="super">▶ Try it in the playground</button>
         </article>
         <article class="card">
           <div class="card-emoji">🔗</div>
@@ -170,6 +177,7 @@
           <p>Use <b>H then CNOT</b> and the two qubits become a single team: measure one and you
           instantly know the other, even if they're far apart. Einstein called it "spooky." Try
           the <b>Bell pair</b> example!</p>
+          <button class="try-btn" data-try="bell">▶ Try it in the playground</button>
         </article>
         <article class="card">
           <div class="card-emoji">🕸️</div>
@@ -177,6 +185,7 @@
           <p>Instead of multiplying big matrices, ZX-calculus draws quantum logic as
           <b>green and red dots</b> ("spiders") joined by wires. Same physics, way friendlier —
           that's the whole idea behind this tool.</p>
+          <button class="try-btn" data-try="zx">▶ Try it in the playground</button>
         </article>
         <article class="card">
           <div class="card-emoji">🎚️</div>
@@ -184,6 +193,7 @@
           <p>Gates like <b>S, T</b> and <b>RZ</b> nudge a qubit by an <i>angle</i> (a phase). In a
           ZX-diagram that angle is just a number written inside the dot. Hit <b>Simplify</b> to
           watch same-coloured dots merge and their angles add up.</p>
+          <button class="try-btn" data-try="phase">▶ Try it in the playground</button>
         </article>
         <article class="card">
           <div class="card-emoji">📏</div>
@@ -191,6 +201,7 @@
           <p>You can't peek at a qubit without changing it. Measuring forces the spinning coin to
           land. Press <b>🎲 Measure!</b> and the superposition collapses to a single answer —
           chosen randomly, weighted by those probability bars.</p>
+          <button class="try-btn" data-try="measure">▶ Try it in the playground</button>
         </article>
       </div>
     </section>

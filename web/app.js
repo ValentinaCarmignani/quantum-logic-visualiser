@@ -33,7 +33,7 @@
     $("q-minus").onclick = () => changeQubits(-1);
     $("add-gate").onclick = addGate;
     $("undo").onclick = () => { state.circuit.pop(); render(); };
-    $("clear").onclick = () => { state.circuit = []; render(); };
+    $("clear").onclick = () => { state.circuit = []; hideGuide(); render(); };
     $("simplify").onclick = (e) => {
       state.simplified = !state.simplified;
       e.currentTarget.classList.toggle("on", state.simplified);
@@ -46,6 +46,10 @@
     document.querySelectorAll(".ex-btn").forEach((b) => {
       b.onclick = () => loadExample(b.dataset.example);
     });
+    document.querySelectorAll(".try-btn").forEach((b) => {
+      b.onclick = () => tryLesson(b.dataset.try);
+    });
+    $("guide-close").onclick = hideGuide;
     document.querySelectorAll("[data-github]").forEach((a) => { a.href = REPO_URL; a.target = "_blank"; });
 
     selectGate("H");
@@ -145,11 +149,80 @@
       super: [1, [["H", 0]]],
     }[kind];
     if (!ex) return;
+    hideGuide();
     state.nQubits = ex[0];
     $("q-count").textContent = state.nQubits;
     state.circuit = ex[1].map((g) => g.slice());
     render(true);
   }
+
+  /* ===================================================================== */
+  /*  "Try it!" lessons — one per concept card in the Learn section        */
+  /* ===================================================================== */
+  // Each lesson loads a small circuit into the playground and shows a short
+  // guide message telling the student what to look at and what to try next.
+  const LESSONS = {
+    flip: {
+      qubits: 1, circuit: [["X", 0]],
+      tip: "The <b>X</b> gate flipped the coin: |0⟩ became |1⟩, 100% of the time. " +
+           "That's just a normal bit. Now add an <b>H</b> gate on qubit 0 and watch what changes!",
+    },
+    super: {
+      qubits: 1, circuit: [["H", 0]],
+      tip: "One <b>H</b> gate and the bars split <b>50/50</b>: the coin is spinning. " +
+           "Press <b>🎲 Measure!</b> a few times. Sometimes you get 0, sometimes 1.",
+    },
+    bell: {
+      qubits: 2, circuit: [["H", 0], ["CNOT", 0, 1]],
+      tip: "<b>H</b> then <b>CNOT</b> links the two qubits. Only |00⟩ and |11⟩ are possible! " +
+           "Press <b>🎲 Measure!</b> a few times: the two qubits <b>always agree</b>.",
+    },
+    zx: {
+      qubits: 2, circuit: [["H", 0], ["CNOT", 0, 1]],
+      tip: "Every gate became a picture: the <b>yellow box</b> is H, and CNOT is a " +
+           "<b>green dot</b> wired to a <b>red dot</b>. Hover over any dot to see what it is.",
+    },
+    phase: {
+      qubits: 1, circuit: [["H", 0], ["S", 0], ["T", 0]], simplify: true,
+      tip: "<b>✨ Simplify</b> merged <b>S</b> (π/2) and <b>T</b> (π/4) into one dot: " +
+           "π/2 + π/4 = <b>3π/4</b>. <b>The merging rule:</b> two dots join together when they are " +
+           "the <b>same colour</b>, on the <b>same qubit line</b>, with <b>nothing in between</b> " +
+           "(no yellow H box), and their angles <b>add up</b>. Notice the bars didn't move. A phase is " +
+           "invisible until another gate turns it into something you can measure.",
+    },
+    measure: {
+      qubits: 2, circuit: [["H", 0], ["H", 1]],
+      tip: "Two spinning qubits give <b>4 possible answers</b>, 25% each. Press " +
+           "<b>🎲 Measure!</b> and the superposition collapses to just one of them.",
+    },
+  };
+
+  function tryLesson(name) {
+    const lesson = LESSONS[name];
+    if (!lesson) return;
+    state.nQubits = lesson.qubits;
+    $("q-count").textContent = state.nQubits;
+    state.circuit = lesson.circuit.map((g) => g.slice());
+    state.simplified = !!lesson.simplify;
+    $("simplify").classList.toggle("on", state.simplified);
+    render(true);
+    showGuide(lesson.tip);
+
+    const reduceMotion = window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Scroll to the diagram panel (on phones the controls stack above it).
+    const visual = document.querySelector(".panel.visual");
+    visual.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    visual.classList.remove("spotlight");
+    void visual.offsetWidth; // restart the highlight animation
+    visual.classList.add("spotlight");
+  }
+
+  function showGuide(html) {
+    $("guide-text").innerHTML = html;
+    $("guide").hidden = false;
+  }
+  function hideGuide() { $("guide").hidden = true; }
 
   /* ===================================================================== */
   /*  Rendering                                                            */
