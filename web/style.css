@@ -307,7 +307,6 @@ a:hover { text-decoration: underline; }
 @keyframes guide-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
 /* brief glow on the diagram panel after a "Try it!" jump */
-.panel.visual { scroll-margin-top: 16px; }
 .panel.visual.spotlight { animation: spotlight 1.6s ease-out; }
 @keyframes spotlight {
   0%   { box-shadow: 0 0 0 0 rgba(68, 224, 255, 0.0), var(--shadow); }
@@ -320,6 +319,111 @@ a:hover { text-decoration: underline; }
   html { scroll-behavior: auto; }
   .guide, .panel.visual.spotlight { animation: none; }
   .try-btn:hover { transform: none; }
+}
+
+/* =====================================================================
+ *  Accessibility toolbar ("Make it easier") and its four modes
+ * ===================================================================== */
+:root { --a11y-h: 52px; }
+html { scroll-padding-top: calc(var(--a11y-h) + 12px); }
+
+.a11y-bar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px;
+  padding: 8px 16px;
+  background: rgba(11, 14, 35, 0.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--stroke);
+}
+.a11y-title { color: var(--muted); font-weight: 800; font-size: 0.9rem; margin-right: 4px; }
+.a11y-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--stroke); background: rgba(255, 255, 255, 0.06); color: var(--text);
+  border-radius: 999px; padding: 7px 14px; min-height: 36px;
+  font: inherit; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.a11y-btn:hover { background: rgba(255, 255, 255, 0.14); }
+.a11y-btn[aria-pressed="true"] {
+  background: rgba(68, 224, 255, 0.18); border-color: var(--cyan); color: #fff;
+}
+.a11y-btn[aria-pressed="true"]::after { content: "✓"; color: var(--cyan); font-weight: 900; }
+.a11y-btn:focus-visible, .listen-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.a11y-icon { font-weight: 800; }
+
+/* Listen buttons (cards) and replay button (guide) only show with Read aloud on */
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 18px; }
+.card-actions .try-btn { margin-top: 0; }
+.listen-btn {
+  display: none; border: 1px solid var(--stroke); background: rgba(255,255,255,0.06); color: var(--text);
+  border-radius: 999px; padding: 9px 14px; font: inherit; font-weight: 800; font-size: 0.9rem; cursor: pointer;
+}
+.listen-btn:hover { background: rgba(255,255,255,0.14); }
+.guide-speak { display: none; }
+.a11y-read .listen-btn { display: inline-block; }
+.a11y-read .guide-speak { display: inline-block; }
+.listen-btn[hidden], .guide-speak[hidden] { display: none !important; }
+
+/* stop the sticky bar covering the diagram after a "Try it!" jump */
+.panel.visual { scroll-margin-top: 0; } /* the page-wide scroll-padding above already leaves room */
+
+/* ---- Easy-read font: Lexend + extra spacing ---- */
+.a11y-font body,
+.a11y-font body *:not(code):not(.prob-label) {
+  font-family: "Lexend", "Verdana", sans-serif !important;
+}
+.a11y-font body { letter-spacing: 0.03em; word-spacing: 0.12em; line-height: 1.8; }
+.a11y-font .card p, .a11y-font .section-lead, .a11y-font .hero-sub, .a11y-font .guide-text { line-height: 1.85; }
+
+/* ---- Bigger text (everything is sized in rem, so this scales the page) ---- */
+.a11y-big { font-size: 118%; }
+@media (min-width: 901px) { .a11y-big .playground { grid-template-columns: 400px 1fr; } }
+
+/* ---- Calm mode: softer colours, nothing moving ---- */
+.a11y-calm {
+  --grad: linear-gradient(120deg, #5b55a8 0%, #4f6aa3 100%);
+  --pink: #a986c9;
+  --cyan: #7fc8dc;
+  --yellow: #e6c869;
+}
+.a11y-calm .bg-blobs { display: none; }
+.a11y-calm body { background: var(--bg); }
+.a11y-calm .grad { -webkit-text-fill-color: #b9b4f0; color: #b9b4f0; background: none; }
+.a11y-calm .btn-primary { box-shadow: none; }
+.a11y-calm .why-card { background: rgba(255, 255, 255, 0.04); }
+
+/* Calm mode and the device's own "reduce motion" setting both stop animations */
+.a11y-calm *, .a11y-calm *::before, .a11y-calm *::after {
+  animation: none !important; transition: none !important; scroll-behavior: auto !important;
+}
+.a11y-calm .card:hover, .a11y-calm .btn:hover, .a11y-calm .try-btn:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .card:hover, .btn:hover { transform: none; }
+}
+
+/* ---- Colour-blind mode: letters on spiders, legend and hero dots ---- */
+.a11y-cb .legend .dot.green, .a11y-cb .legend .dot.red {
+  width: 18px; height: 18px; display: inline-grid; place-items: center;
+  font-size: 0.7rem; font-weight: 900; color: #0b0e23;
+}
+.a11y-cb .legend .dot.green::after { content: "Z"; }
+.a11y-cb .legend .dot.red::after { content: "X"; }
+.a11y-cb .legend .dot.red { outline: 2px dashed #fff; outline-offset: 1px; }
+.a11y-cb .demo-spider { position: relative; }
+.a11y-cb .demo-spider.green::after, .a11y-cb .demo-spider.red::after {
+  position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; background: #0b0e23; color: #fff;
+  border: 2px solid #fff; font-size: 0.75rem; font-weight: 900;
+}
+.a11y-cb .demo-spider.green::after { content: "Z"; }
+.a11y-cb .demo-spider.red::after { content: "X"; }
+.a11y-cb .demo-spider.red { border-style: dashed; }
+
+/* ---- toolbar on phones: icons only (labels stay readable to screen readers) ---- */
+@media (max-width: 640px) {
+  .a11y-title, .a11y-label { display: none; }
+  .a11y-bar { gap: 6px; padding: 7px 10px; }
+  .a11y-btn { padding: 7px 11px; }
 }
 
 /* ---- responsive ---- */

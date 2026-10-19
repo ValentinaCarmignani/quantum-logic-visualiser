@@ -9,8 +9,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script src="accessibility.js"></script>
 </head>
 <body>
+
+  <!-- ====================== ACCESSIBILITY TOOLBAR ====================== -->
+  <div class="a11y-bar" role="toolbar" aria-label="Make it easier to read and use">
+    <span class="a11y-title">Make it easier:</span>
+    <button class="a11y-btn" data-a11y="font" aria-pressed="false" aria-label="Easy-read font" title="Easy-read font">
+      <span class="a11y-icon" aria-hidden="true">Aa</span><span class="a11y-label">Easy-read font</span>
+    </button>
+    <button class="a11y-btn" data-a11y="big" aria-pressed="false" aria-label="Bigger text" title="Bigger text">
+      <span class="a11y-icon" aria-hidden="true">A+</span><span class="a11y-label">Bigger text</span>
+    </button>
+    <button class="a11y-btn" data-a11y="calm" aria-pressed="false" aria-label="Calm mode: softer colours and no animations" title="Calm mode: softer colours, no animations">
+      <span class="a11y-icon" aria-hidden="true">🌙</span><span class="a11y-label">Calm</span>
+    </button>
+    <button class="a11y-btn" data-a11y="cb" aria-pressed="false" aria-label="Colour-blind mode: letters on the spiders" title="Colour-blind mode: Z and X letters on the spiders">
+      <span class="a11y-icon" aria-hidden="true">🎨</span><span class="a11y-label">Colour-blind</span>
+    </button>
+    <button class="a11y-btn" data-a11y="read" aria-pressed="false" aria-label="Read aloud" title="Read tips aloud">
+      <span class="a11y-icon" aria-hidden="true">🔊</span><span class="a11y-label">Read aloud</span>
+    </button>
+  </div>
 
   <!-- floating background blobs -->
   <div class="bg-blobs" aria-hidden="true">
@@ -132,6 +153,7 @@
           <div id="guide" class="guide" role="status" aria-live="polite" hidden>
             <span class="guide-icon" aria-hidden="true">🧭</span>
             <p id="guide-text" class="guide-text"></p>
+            <button id="guide-speak" class="guide-close guide-speak" aria-label="Read this tip aloud" title="Read aloud">🔊</button>
             <button id="guide-close" class="guide-close" aria-label="Close this tip">✕</button>
           </div>
           <div id="circuit-strip" class="circuit-strip"></div>
@@ -162,14 +184,20 @@
           <p>A normal bit is a coin lying flat: heads (0) or tails (1). A <b>qubit</b> is a
           coin <i>spinning in the air</i> — somehow both at once until it lands. That "spinning"
           is what gives quantum computers their power.</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="flip">▶ Try it in the playground</button>
+          </div>
         </article>
         <article class="card">
           <div class="card-emoji">🌫️</div>
           <h3>Superposition</h3>
           <p>The <b>Hadamard (H)</b> gate sets a qubit spinning, so it has a 50/50 chance of
           landing on 0 or 1. Add an H and watch the probability bars split exactly in half.</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="super">▶ Try it in the playground</button>
+          </div>
         </article>
         <article class="card">
           <div class="card-emoji">🔗</div>
@@ -177,7 +205,10 @@
           <p>Use <b>H then CNOT</b> and the two qubits become a single team: measure one and you
           instantly know the other, even if they're far apart. Einstein called it "spooky." Try
           the <b>Bell pair</b> example!</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="bell">▶ Try it in the playground</button>
+          </div>
         </article>
         <article class="card">
           <div class="card-emoji">🕸️</div>
@@ -185,7 +216,10 @@
           <p>Instead of multiplying big matrices, ZX-calculus draws quantum logic as
           <b>green and red dots</b> ("spiders") joined by wires. Same physics, way friendlier —
           that's the whole idea behind this tool.</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="zx">▶ Try it in the playground</button>
+          </div>
         </article>
         <article class="card">
           <div class="card-emoji">🎚️</div>
@@ -193,7 +227,10 @@
           <p>Gates like <b>S, T</b> and <b>RZ</b> nudge a qubit by an <i>angle</i> (a phase). In a
           ZX-diagram that angle is just a number written inside the dot. Hit <b>Simplify</b> to
           watch same-coloured dots merge and their angles add up.</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="phase">▶ Try it in the playground</button>
+          </div>
         </article>
         <article class="card">
           <div class="card-emoji">📏</div>
@@ -201,7 +238,10 @@
           <p>You can't peek at a qubit without changing it. Measuring forces the spinning coin to
           land. Press <b>🎲 Measure!</b> and the superposition collapses to a single answer —
           chosen randomly, weighted by those probability bars.</p>
+          <div class="card-actions">
+          <button class="listen-btn" aria-label="Listen to this card">🔊 Listen</button>
           <button class="try-btn" data-try="measure">▶ Try it in the playground</button>
+          </div>
         </article>
       </div>
     </section>
