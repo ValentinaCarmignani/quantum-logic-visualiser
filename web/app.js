@@ -184,8 +184,10 @@
     },
     phase: {
       qubits: 1, circuit: [["H", 0], ["S", 0], ["T", 0]], simplify: true,
-      tip: "<b>S</b> (π/2) and <b>T</b> (π/4) are both green dots, so <b>✨ Simplify</b> merged them " +
-           "into one dot: π/2 + π/4 = <b>3π/4</b>. Notice the bars didn't move. A phase is " +
+      tip: "<b>✨ Simplify</b> merged <b>S</b> (π/2) and <b>T</b> (π/4) into one dot: " +
+           "π/2 + π/4 = <b>3π/4</b>. <b>The merging rule:</b> two dots join together when they are " +
+           "the <b>same colour</b>, on the <b>same qubit line</b>, with <b>nothing in between</b> " +
+           "(no yellow H box), and their angles <b>add up</b>. Notice the bars didn't move. A phase is " +
            "invisible until another gate turns it into something you can measure.",
     },
     measure: {
