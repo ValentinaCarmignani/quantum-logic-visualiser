@@ -275,6 +275,53 @@ a:hover { text-decoration: underline; }
   font-size: 0.85rem; max-width: 240px; pointer-events: none; box-shadow: var(--shadow);
 }
 
+/* ---- "Try it!" buttons on the concept cards ---- */
+.card { display: flex; flex-direction: column; }
+.card p { flex: 1; }
+.try-btn {
+  align-self: flex-start; margin-top: 18px;
+  border: 1px solid rgba(68, 224, 255, 0.45); background: rgba(68, 224, 255, 0.08);
+  color: var(--cyan); border-radius: 999px; padding: 9px 16px;
+  font: inherit; font-weight: 800; font-size: 0.9rem; cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.try-btn:hover { background: rgba(68, 224, 255, 0.18); transform: translateX(3px); }
+.try-btn:focus-visible, .guide-close:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+
+/* ---- guide message shown in the playground ---- */
+.guide {
+  display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 0;
+  padding: 14px 16px; border-radius: 14px;
+  background: linear-gradient(120deg, rgba(124,77,255,0.22), rgba(68,224,255,0.14));
+  border: 1px solid rgba(124, 77, 255, 0.55);
+  animation: guide-in 0.35s ease-out;
+}
+.guide[hidden] { display: none; }
+.guide-icon { font-size: 1.5rem; line-height: 1; }
+.guide-text { margin: 0; flex: 1; line-height: 1.55; font-size: 1rem; }
+.guide-close {
+  background: transparent; border: 0; color: var(--muted); font-size: 1rem;
+  cursor: pointer; padding: 2px 6px; border-radius: 6px;
+}
+.guide-close:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+@keyframes guide-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* brief glow on the diagram panel after a "Try it!" jump */
+.panel.visual { scroll-margin-top: 16px; }
+.panel.visual.spotlight { animation: spotlight 1.6s ease-out; }
+@keyframes spotlight {
+  0%   { box-shadow: 0 0 0 0 rgba(68, 224, 255, 0.0), var(--shadow); }
+  25%  { box-shadow: 0 0 0 4px rgba(68, 224, 255, 0.65), var(--shadow); }
+  100% { box-shadow: 0 0 0 0 rgba(68, 224, 255, 0.0), var(--shadow); }
+}
+
+/* respect students who turn off animations in their device settings */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .guide, .panel.visual.spotlight { animation: none; }
+  .try-btn:hover { transform: none; }
+}
+
 /* ---- responsive ---- */
 @media (max-width: 900px) {
   .playground { grid-template-columns: 1fr; }
