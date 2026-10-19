@@ -18,6 +18,11 @@
     nQubits: 2,
     selectedGate: "H",
     simplified: false,
+    // puzzle restrictions (set by quests.js through window.Playground)
+    locked: 0,          // the first `locked` gates belong to the puzzle and can't be removed
+    allowed: null,      // Set of gate names the student may use, or null for all
+    fixedQubits: false, // true = the qubit count can't be changed
+    target: null,       // goal probabilities, drawn as dashed outlines on the bars
   };
 
   /* ---- handy DOM lookups ---- */
@@ -32,8 +37,11 @@
     $("q-plus").onclick = () => changeQubits(1);
     $("q-minus").onclick = () => changeQubits(-1);
     $("add-gate").onclick = addGate;
-    $("undo").onclick = () => { state.circuit.pop(); render(); };
-    $("clear").onclick = () => { state.circuit = []; hideGuide(); render(); };
+    $("undo").onclick = () => {
+      if (state.circuit.length > state.locked) state.circuit.pop();
+      render();
+    };
+    $("clear").onclick = () => { state.circuit = state.circuit.slice(0, state.locked); hideGuide(); render(); };
     $("simplify").onclick = (e) => {
       state.simplified = !state.simplified;
       e.currentTarget.classList.toggle("on", state.simplified);
@@ -78,6 +86,7 @@
   /*  Controls                                                             */
   /* ===================================================================== */
   function selectGate(name) {
+    if (state.allowed && !state.allowed.has(name)) return;
     state.selectedGate = name;
     $("sel-gate").textContent = name;
     $("sel-help").textContent = QE.GATE_HELP[name] || "";
@@ -90,6 +99,7 @@
   }
 
   function changeQubits(delta) {
+    if (state.fixedQubits) return;
     state.nQubits = Math.max(1, Math.min(8, state.nQubits + delta));
     $("q-count").textContent = state.nQubits;
     // drop gates that now point at a missing qubit
@@ -146,6 +156,7 @@
   }
 
   function loadExample(kind) {
+    leavePuzzle();
     const ex = {
       bell: [2, [["H", 0], ["CNOT", 0, 1]]],
       ghz: [3, [["H", 0], ["CNOT", 0, 1], ["CNOT", 1, 2]]],
@@ -203,6 +214,7 @@
   function tryLesson(name) {
     const lesson = LESSONS[name];
     if (!lesson) return;
+    leavePuzzle();
     state.nQubits = lesson.qubits;
     $("q-count").textContent = state.nQubits;
     state.circuit = lesson.circuit.map((g) => g.slice());
@@ -238,6 +250,9 @@
     layout(graph);
     drawDiagram(graph, animate);
     drawProbabilities();
+    document.dispatchEvent(new CustomEvent("playground:change", {
+      detail: { probs: lastProbs, circuit: state.circuit.slice(), added: state.circuit.length - state.locked },
+    }));
   }
 
   function drawCircuitStrip() {
@@ -255,9 +270,16 @@
       if (QE.PARAMETRIC.has(g[0])) label += "(" + QE.prettyPhase(g[g.length - 1]) + ") q" + g[1];
       else if (QE.GATE_ARITY[g[0]] === 2) label += " q" + g[1] + ",q" + g[2];
       else label += " q" + g[1];
-      chip.innerHTML = label + ' <span class="x">✕</span>';
-      chip.title = "Click to remove";
-      chip.onclick = () => { state.circuit.splice(i, 1); render(); };
+      if (i < state.locked) {
+        // part of the puzzle: shown with a lock and can't be removed
+        chip.classList.add("locked");
+        chip.innerHTML = '<span aria-hidden="true">🔒</span> ' + label;
+        chip.title = "This gate is part of the puzzle";
+      } else {
+        chip.innerHTML = label + ' <span class="x">✕</span>';
+        chip.title = "Click to remove";
+        chip.onclick = () => { state.circuit.splice(i, 1); render(); };
+      }
       strip.appendChild(chip);
     });
   }
@@ -402,7 +424,17 @@
     lastProbs = probs;
     $("ket").textContent = ket;
 
-    const entries = Object.entries(probs).sort((a, b) => a[0].localeCompare(b[0]));
+    let entries = Object.entries(probs);
+    const target = state.target;
+    if (target) {
+      // show every possible outcome so empty goal columns are visible too
+      const all = {};
+      for (let k = 0; k < (1 << state.nQubits); k++) all[k.toString(2).padStart(state.nQubits, "0")] = 0;
+      Object.assign(all, probs);
+      entries = Object.entries(all);
+    }
+    wrap.classList.toggle("with-goal", !!target);
+    entries.sort((a, b) => a[0].localeCompare(b[0]));
     entries.forEach(([bits, p]) => {
       const col = document.createElement("div");
       col.className = "prob-col";
@@ -416,7 +448,21 @@
       const lbl = document.createElement("div");
       lbl.className = "prob-label";
       lbl.textContent = "|" + bits + "⟩";
-      col.appendChild(pct); col.appendChild(bar); col.appendChild(lbl);
+      if (target) {
+        const goal = target[bits] || 0;
+        const track = document.createElement("div");
+        track.className = "prob-track";
+        const outline = document.createElement("div");
+        outline.className = "prob-goal";
+        outline.style.height = Math.max(3, goal * 120) + "px";
+        outline.title = "Goal: " + Math.round(goal * 100) + "%";
+        track.appendChild(outline);
+        track.appendChild(bar);
+        if (Math.abs(goal - p) < 1e-6) col.classList.add("on-target");
+        col.appendChild(pct); col.appendChild(track); col.appendChild(lbl);
+      } else {
+        col.appendChild(pct); col.appendChild(bar); col.appendChild(lbl);
+      }
       wrap.appendChild(col);
       // animate to full height next frame
       requestAnimationFrame(() => { bar.style.height = Math.max(3, p * 120) + "px"; });
@@ -474,6 +520,68 @@
       btn.animate([{ transform: "scale(1)" }, { transform: "scale(0.94)" }, { transform: "scale(1)" }], { duration: 180 });
     }
   }
+
+  /* ===================================================================== */
+  /*  Puzzle hooks — used by quests.js                                     */
+  /* ===================================================================== */
+  function updatePalette() {
+    document.querySelectorAll(".gate-btn").forEach((b) => {
+      const ok = !state.allowed || state.allowed.has(b.dataset.gate);
+      b.disabled = !ok;
+      b.classList.toggle("unavailable", !ok);
+    });
+    $("q-plus").disabled = $("q-minus").disabled = state.fixedQubits;
+    document.querySelector(".examples").hidden = !!state.allowed;
+  }
+
+  function setPuzzle(p) {
+    hideGuide();
+    state.nQubits = p.qubits;
+    $("q-count").textContent = state.nQubits;
+    state.circuit = p.start.map((g) => g.slice());
+    state.locked = p.start.length;
+    state.allowed = new Set(p.allowed);
+    state.fixedQubits = true;
+    state.target = p.target;
+    state.simplified = false;
+    $("simplify").classList.remove("on");
+    updatePalette();
+    selectGate(p.allowed[0]);
+    $("qubit-input").value = QE.GATE_ARITY[p.allowed[0]] === 2 ? "0,1" : "0";
+    render(true);
+  }
+
+  function clearPuzzle() {
+    state.locked = 0;
+    state.allowed = null;
+    state.fixedQubits = false;
+    state.target = null;
+    updatePalette();
+  }
+
+  // Free-play buttons ("Try it!", examples) quietly leave quest mode first.
+  function leavePuzzle() {
+    if (!state.allowed) return;
+    clearPuzzle();
+    document.dispatchEvent(new CustomEvent("playground:freeplay"));
+  }
+
+  window.Playground = {
+    setPuzzle: setPuzzle,
+    clearPuzzle: () => { clearPuzzle(); render(); },
+    // replace everything after the locked gates (used by "Show answer")
+    setMoves(moves) {
+      state.circuit = state.circuit.slice(0, state.locked).concat(moves.map((g) => g.slice()));
+      render(true);
+    },
+    snapshot: () => ({ circuit: state.circuit.map((g) => g.slice()), nQubits: state.nQubits }),
+    restore(snap) {
+      state.nQubits = snap.nQubits;
+      $("q-count").textContent = state.nQubits;
+      state.circuit = snap.circuit.map((g) => g.slice());
+      render();
+    },
+  };
 
   document.addEventListener("DOMContentLoaded", init);
 })();

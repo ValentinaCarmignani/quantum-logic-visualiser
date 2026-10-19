@@ -84,6 +84,45 @@
         the <b>ZX-diagram</b> (the picture) and the <b>measurement chances</b> (the numbers).
       </p>
 
+      <div class="mode-tabs" role="group" aria-label="Playground mode">
+        <button id="tab-free" class="mode-tab" aria-pressed="true">🧪 Free play</button>
+        <button id="tab-quests" class="mode-tab" aria-pressed="false">🏆 Quantum Quests <span id="quest-star-total" class="star-total"></span></button>
+      </div>
+
+      <!-- ====================== QUANTUM QUESTS ====================== -->
+      <div id="quest-panel" class="panel quest-panel" hidden>
+        <div id="quest-levels" class="quest-levels" aria-label="Choose a level"></div>
+
+        <div class="quest-main">
+          <div class="quest-info">
+            <div class="quest-kicker">Level <span id="quest-num">1</span> of 10</div>
+            <h3 id="quest-title" class="quest-title"></h3>
+            <p id="quest-goal" class="quest-goal"></p>
+            <p class="quest-meta">
+              Gates you can use: <b id="quest-gates"></b> ·
+              ⭐⭐⭐ in <b id="quest-best"></b> ·
+              <span class="goal-key"><i aria-hidden="true"></i> dashed outline = goal</span>
+            </p>
+            <p id="quest-record" class="quest-record"></p>
+          </div>
+          <div class="quest-help">
+            <button id="quest-hint" class="chip-btn">💡 Hint (2 left)</button>
+            <button id="quest-answer" class="chip-btn quest-answer">👀 Show answer</button>
+            <button id="quest-retry" class="chip-btn">↺ Start again</button>
+          </div>
+        </div>
+        <div id="quest-hints" class="quest-hints" aria-live="polite"></div>
+
+        <div id="quest-win" class="quest-win" role="status" aria-live="polite" hidden>
+          <div class="quest-win-text">
+            <div id="quest-win-head" class="quest-win-head"></div>
+            <p id="quest-win-detail"></p>
+            <p id="quest-finale" class="quest-finale" hidden>🏆 <b>You finished every Quantum Quest!</b> You're officially a quantum circuit builder.</p>
+          </div>
+          <button id="quest-next" class="btn btn-primary">Next level ▶</button>
+        </div>
+      </div>
+
       <div class="playground">
         <!-- LEFT: controls -->
         <div class="panel controls">
@@ -310,5 +349,6 @@
 
   <script src="quantum-engine.js"></script>
   <script src="app.js"></script>
+  <script src="quests.js"></script>
 </body>
 </html>

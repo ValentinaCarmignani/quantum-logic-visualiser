@@ -426,6 +426,100 @@ html { scroll-padding-top: calc(var(--a11y-h) + 12px); }
   .a11y-btn { padding: 7px 11px; }
 }
 
+/* =====================================================================
+ *  Quantum Quests
+ * ===================================================================== */
+.mode-tabs { display: flex; justify-content: center; gap: 10px; margin: 0 auto 18px; flex-wrap: wrap; }
+.mode-tab {
+  border: 1px solid var(--stroke); background: rgba(255,255,255,0.06); color: var(--text);
+  border-radius: 999px; padding: 11px 22px; font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+}
+.mode-tab:hover { background: rgba(255,255,255,0.12); }
+.mode-tab[aria-pressed="true"] { background: var(--grad); border-color: transparent; color: #fff; }
+.mode-tab:focus-visible, .level-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.star-total { font-size: 0.85rem; opacity: 0.9; margin-left: 4px; }
+.star-total:empty { display: none; }
+
+.quest-panel { margin-bottom: 22px; }
+.quest-panel[hidden] { display: none; }
+.quest-levels { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.level-btn {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 52px; height: 56px; padding: 4px 6px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--text); font: inherit;
+}
+.level-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.level-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.level-btn.done { border-color: rgba(61, 220, 132, 0.55); }
+.level-btn.current { border: 2px solid var(--cyan); background: rgba(68,224,255,0.14); }
+.level-n { font-weight: 800; font-size: 1.05rem; line-height: 1.1; }
+.level-stars { font-size: 0.62rem; letter-spacing: -1px; min-height: 0.9rem; }
+.level-stars.helped { font-size: 0.95rem; letter-spacing: 0; line-height: 1; }
+.examples[hidden] { display: none; }
+
+.quest-main { display: flex; gap: 20px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.quest-info { flex: 1 1 380px; }
+.quest-kicker { color: var(--cyan); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.quest-title { margin: 2px 0 6px; font-size: 1.5rem; }
+.quest-goal { margin: 0 0 8px; font-size: 1.1rem; }
+.quest-meta { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.quest-meta b { color: var(--text); }
+.goal-key i {
+  display: inline-block; width: 12px; height: 14px; vertical-align: -2px; margin-right: 3px;
+  border: 2px dashed var(--yellow); border-radius: 3px;
+}
+.quest-record { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+.quest-record:empty { display: none; }
+.quest-help { display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+.quest-help .chip-btn { flex: none; }
+.chip-btn:disabled { opacity: 0.5; cursor: default; }
+.quest-answer.confirm { background: rgba(255, 90, 95, 0.22); border-color: var(--red); }
+.quest-hints:empty { display: none; }
+.quest-hints { margin-top: 12px; }
+.quest-hint-text {
+  margin: 8px 0 0; padding: 10px 14px; border-radius: 12px;
+  background: rgba(255, 210, 63, 0.10); border: 1px solid rgba(255, 210, 63, 0.35);
+}
+
+.quest-win {
+  margin-top: 16px; padding: 16px 18px; border-radius: 14px;
+  display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  background: linear-gradient(120deg, rgba(61,220,132,0.20), rgba(68,224,255,0.14));
+  border: 1px solid rgba(61, 220, 132, 0.6);
+  animation: guide-in 0.35s ease-out;
+}
+.quest-win[hidden] { display: none; }
+.quest-win-text { flex: 1 1 320px; }
+.quest-win-head { font-family: "Fredoka", "Nunito", sans-serif; font-size: 1.35rem; font-weight: 700; }
+.quest-win p { margin: 4px 0 0; }
+.quest-learned { display: inline-block; margin-top: 6px; color: var(--muted); }
+.quest-finale { color: var(--yellow); }
+
+/* in quest mode the bars show every outcome with a dashed goal outline */
+.prob-bars.with-goal { height: 178px; }
+.prob-track { position: relative; width: 100%; height: 120px; display: flex; align-items: flex-end; justify-content: center; }
+.prob-goal {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 60px; border: 2px dashed var(--yellow); border-radius: 8px 8px 4px 4px;
+  pointer-events: none; z-index: 1;
+}
+.prob-col.on-target .prob-label { color: var(--green); font-weight: 800; }
+.prob-col.on-target .prob-label::after { content: " ✓"; }
+
+/* locked puzzle gates and unavailable palette gates */
+.gate-chip.locked { cursor: default; background: rgba(255,255,255,0.08); border-style: dashed; }
+.gate-btn.unavailable { opacity: 0.25; cursor: not-allowed; }
+
+/* confetti */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+.confetti i {
+  position: absolute; top: -20px; width: 9px; height: 14px; border-radius: 2px;
+  animation: confetti-fall 2.4s cubic-bezier(.25,.6,.4,1) forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translate(var(--drift), 105vh) rotate(var(--spin)); opacity: 0.9; }
+}
+
 /* ---- responsive ---- */
 @media (max-width: 900px) {
   .playground { grid-template-columns: 1fr; }
